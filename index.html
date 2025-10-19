@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --danger: #e63946;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            transition: all 0.3s;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Login Page Styles */
+        #login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+        }
+
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .login-header h2 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
+        }
+
+        .signup-link a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* App Styles */
+        #app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--dark);
+            color: white;
+            padding: 1.5rem 0;
+            transition: all 0.3s;
+        }
+
+        .logo {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .logo h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .search-container {
+            padding: 1rem 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: none;
+            background-color: #4a5568;
+            color: white;
+        }
+
+        .search-input::placeholder {
+            color: #a0aec0;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.75rem 1.5rem;
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: #4a5568;
+            color: white;
+            border-left: 4px solid var(--primary);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+
+        .content-page {
+            display: none;
+        }
+
+        .content-page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .user-info img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card h3 .edit-icon {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Budget Overview */
+        .budget-overview {
+            margin-bottom: 1.5rem;
+        }
+
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .amount {
+            font-weight: 700;
+        }
+
+        .spent {
+            color: var(--danger);
+        }
+
+        .remaining {
+            color: #38a169;
+        }
+
+        .budget-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .btn-secondary {
+            padding: 0.5rem 1rem;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+        }
+
+        /* Category List */
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .category-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .category-name {
+            font-weight: 500;
+        }
+
+        .category-status {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .on-track {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+
+        .warning {
+            background-color: #fef5e7;
+            color: #744210;
+        }
+
+        .over {
+            background-color: #fed7d7;
+            color: #742a2a;
+        }
+
+        /* Budget Grid */
+        .budget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Budget Table */
+        .budget-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .budget-table th, .budget-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .budget-table th {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* Reports Grid */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .filter-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .profile-form, .notification-settings, .security-settings, 
+        .preference-settings, .integration-settings, .other-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .toggle-label input {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 40px;
+            height: 20px;
+            background-color: #cbd5e0;
+            border-radius: 20px;
+            position: relative;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .toggle-label input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .toggle-label input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .btn-danger {
+            padding: 0.75rem;
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-danger:hover {
+            background-color: #c53030;
+        }
+
+        /* Chart Containers */
+        .trend-chart, .allocation-chart, .expense-chart, .net-worth-chart {
+            height: 200px;
+            margin-top: 1rem;
+        }
+
+        /* Top Expenses */
+        .top-expenses {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        /* Currency Format */
+        .currency {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .logo h2, .nav-link span {
+                display: none;
+            }
+            
+            .nav-link {
+                justify-content: center;
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .dashboard-grid, .budget-grid, .reports-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="page active">
+        <div class="login-container">
+            <div class="login-header">
+                <h1><i class="fas fa-wallet"></i> PERSONAL FINANCE</h1>
+                <h2>Log In</h2>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn-primary">Log In</button>
+            </form>
+            <p class="signup-link">Don't have an account? <a href="#" id="signup-link">Sign Up</a></p>
+        </div>
+    </div>
+
+    <!-- Main App (hidden initially) -->
+    <div id="app" class="page">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-wallet"></i>
+                <h2>PERSONAL FINANCE</h2>
+            </div>
+            <div class="search-container">
+                <input type="text" placeholder="Search" class="search-input">
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                    <li><a href="#" class="nav-link" data-page="budget"><i class="fas fa-chart-pie"></i> <span>Budget</span></a></li>
+                    <li><a href="#" class="nav-link" data-page="reports"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+                    <li><a href="#" class="nav-link" data-page="transactions"><i class="fas fa-exchange-alt"></i> <span>Transactions</span></a></li>
+                    <li><a href="#" class="nav-link" data-page="accounts"><i class="fas fa-university"></i> <span>Accounts</span></a></li>
+                    <li><a href="#" class="nav-link" data-page="settings"><i class="fas fa-cog"></i> <span>Settings</span></a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="content-page active">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <div class="user-info">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4361ee&color=fff" alt="User">
+                        <span id="user-display-name">John Doe</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- Monthly Overview -->
+                    <div class="card">
+                        <h3>Monthly Overview <i class="fas fa-edit edit-icon" id="edit-budget"></i></h3>
+                        <div class="budget-overview">
+                            <div class="budget-item">
+                                <span>Total Budget</span>
+                                <span class="amount currency" id="total-budget">₹5,800</span>
+                            </div>
+                            <div class="budget-stats">
+                                <div class="stat">
+                                    <span>Spent</span>
+                                    <span class="amount spent currency" id="total-spent">₹2,650</span>
+                                </div>
+                                <div class="stat">
+                                    <span>Remaining</span>
+                                    <span class="amount remaining currency" id="total-remaining">₹3,150</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-secondary" id="add-budget-btn">Add New Budget</button>
+                    </div>
+
+                    <!-- Spent by Category -->
+                    <div class="card">
+                        <h3>Spent by Category <i class="fas fa-edit edit-icon" id="edit-categories"></i></h3>
+                        <div class="category-list">
+                            <div class="category-item">
+                                <div class="category-info">
+                                    <span class="category-name">Housing</span>
+                                    <span class="category-status on-track">On track</span>
+                                </div>
+                                <span class="category-amount currency">₹1,200</span>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-info">
+                                    <span class="category-name">Food & Groceries</span>
+                                    <span class="category-status warning">Warning</span>
+                                </div>
+                                <span class="category-amount currency">₹550</span>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-info">
+                                    <span class="category-name">Utilities</span>
+                                    <span class="category-status over">Over</span>
+                                </div>
+                                <span class="category-amount currency">₹280</span>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-info">
+                                    <span class="category-name">Entertainment</span>
+                                    <span class="category-status over">Overspent</span>
+                                </div>
+                                <span class="category-amount currency">₹320</span>
+                            </div>
+                            <div class="category-item">
+                                <div class="category-info">
+                                    <span class="category-name">Debt Repayment</span>
+                                    <span class="category-status over">Over</span>
+                                </div>
+                                <span class="category-amount currency">₹300</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Spending Trend -->
+                    <div class="card full-width">
+                        <h3>Monthly Spending Trend</h3>
+                        <div class="trend-chart">
+                            <canvas id="spendingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Page -->
+            <div id="budget-page" class="content-page">
+                <div class="page-header">
+                    <h1>Budget</h1>
+                    <div class="user-info">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4361ee&color=fff" alt="User">
+                        <span id="user-display-name-budget">John Doe</span>
+                    </div>
+                </div>
+                
+                <div class="budget-grid">
+                    <!-- Monthly Budget -->
+                    <div class="card">
+                        <h3>Monthly Budget <i class="fas fa-edit edit-icon" id="edit-monthly-budget"></i></h3>
+                        <div class="budget-overview">
+                            <div class="budget-item">
+                                <span>Total Budget</span>
+                                <span class="amount currency" id="monthly-total-budget">₹3,200</span>
+                            </div>
+                            <div class="budget-stats">
+                                <div class="stat">
+                                    <span>Spent</span>
+                                    <span class="amount spent currency" id="monthly-total-spent">₹1,450</span>
+                                </div>
+                                <div class="stat">
+                                    <span>Remaining</span>
+                                    <span class="amount remaining currency" id="monthly-total-remaining">₹1,750</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Category Budgets -->
+                    <div class="card">
+                        <h3>Category Budgets <i class="fas fa-edit edit-icon" id="edit-category-budgets"></i></h3>
+                        <table class="budget-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Budget</th>
+                                    <th>Spent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Housing</td>
+                                    <td><span class="status-badge on-track">On track</span></td>
+                                    <td class="currency">₹1,200</td>
+                                    <td class="currency">₹1,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Food</td>
+                                    <td><span class="status-badge on-track">On track</span></td>
+                                    <td class="currency">₹800</td>
+                                    <td class="currency">₹550</td>
+                                </tr>
+                                <tr>
+                                    <td>Transport</td>
+                                    <td><span class="status-badge over">Over</span></td>
+                                    <td class="currency">₹300</td>
+                                    <td class="currency">₹550</td>
+                                </tr>
+                                <tr>
+                                    <td>Savings</td>
+                                    <td><span class="status-badge on-track">On track</span></td>
+                                    <td class="currency">₹400</td>
+                                    <td class="currency">₹200</td>
+                                </tr>
+                                <tr>
+                                    <td>Entertainment</td>
+                                    <td><span class="status-badge over">Over</span></td>
+                                    <td class="currency">₹500</td>
+                                    <td class="currency">₹200</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button class="btn-secondary" id="add-budget-category-btn">Add Budget</button>
+                    </div>
+
+                    <!-- Budget Allocation -->
+                    <div class="card">
+                        <h3>Budget Allocation</h3>
+                        <div class="allocation-chart">
+                            <canvas id="allocationChart"></canvas>
+                        </div>
+                        <button class="btn-secondary">Add New Category</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page" class="content-page">
+                <div class="page-header">
+                    <h1>Financial Reports</h1>
+                    <div class="user-info">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4361ee&color=fff" alt="User">
+                        <span id="user-display-name-reports">John Doe</span>
+                    </div>
+                </div>
+                
+                <div class="reports-grid">
+                    <!-- Filters -->
+                    <div class="card">
+                        <h3>Filter Reports</h3>
+                        <div class="filter-form">
+                            <div class="form-group">
+                                <label for="start-date">Start Date</label>
+                                <input type="date" id="start-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date">End Date</label>
+                                <input type="date" id="end-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="category-filter">Filter by Category</label>
+                                <select id="category-filter">
+                                    <option value="all">All Categories</option>
+                                    <option value="housing">Housing</option>
+                                    <option value="food">Food & Groceries</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="debt">Debt Repayment</option>
+                                </select>
+                            </div>
+                            <button class="btn-primary">Apply Filters</button>
+                        </div>
+                    </div>
+
+                    <!-- Expense Breakdown -->
+                    <div class="card">
+                        <h3>Expense Breakdown by Category</h3>
+                        <div class="expense-chart">
+                            <canvas id="expenseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Net Worth Trend -->
+                    <div class="card">
+                        <h3>Net Worth Trend</h3>
+                        <div class="net-worth-chart">
+                            <canvas id="netWorthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Top Expenses -->
+                    <div class="card">
+                        <h3>Top Expenses</h3>
+                        <div class="top-expenses">
+                            <div class="expense-item">
+                                <span>Groceries</span>
+                                <span class="amount currency">₹1,450</span>
+                            </div>
+                            <div class="expense-item">
+                                <span>Car Payment</span>
+                                <span class="amount currency">₹1,300</span>
+                            </div>
+                            <div class="expense-item">
+                                <span>Savings</span>
+                                <span class="amount currency">₹800</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-page" class="content-page">
+                <div class="page-header">
+                    <h1>Settings</h1>
+                    <div class="user-info">
+                        <img src="https://ui-avatars.com/api/?name=John+Doe&background=4361ee&color=fff" alt="User">
+                        <span id="user-display-name-settings">John Doe</span>
+                    </div>
+                </div>
+                
+                <div class="settings-grid">
+                    <!-- Profile Management -->
+                    <div class="card">
+                        <h3>Profile Management</h3>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" value="John Doe">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" value="john.doe@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="username-settings">Username</label>
+                                <input type="text" id="username-settings" value="johndoe">
+                            </div>
+                            <button class="btn-primary" id="update-profile-btn">Update Profile</button>
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="card">
+                        <h3>Notifications</h3>
+                        <div class="notification-settings">
+                            <div class="setting-item">
+                                <label class="toggle-label">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                    Email Notifications
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label class="toggle-label">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                    Mobile Notifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security -->
+                    <div class="card">
+                        <h3>Security</h3>
+                        <div class="security-settings">
+                            <button class="btn-secondary">Change Password</button>
+                            <button class="btn-secondary">Two-Factor Authentication</button>
+                        </div>
+                    </div>
+
+                    <!-- App Preferences -->
+                    <div class="card">
+                        <h3>App Preferences</h3>
+                        <div class="preference-settings">
+                            <div class="setting-item">
+                                <label class="toggle-label">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                    Financial Alerts
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label class="toggle-label">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                    Recovery Key
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label class="toggle-label">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                    Connect to Other Apps
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Integrations -->
+                    <div class="card">
+                        <h3>Integrations</h3>
+                        <div class="integration-settings">
+                            <div class="form-group">
+                                <label for="theme">Customize Theme</label>
+                                <select id="theme">
+                                    <option value="light">Light</option>
+                                    <option value="dark">Dark</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="currency-settings">Set Default Currency</label>
+                                <select id="currency-settings">
+                                    <option value="inr">Indian Rupee (₹)</option>
+                                    <option value="usd">US Dollar ($)</option>
+                                    <option value="eur">Euro (€)</option>
+                                    <option value="gbp">British Pound (£)</option>
+                                </select>
+                            </div>
+                            <button class="btn-secondary">Manage Data Usage</button>
+                        </div>
+                    </div>
+
+                    <!-- Others -->
+                    <div class="card">
+                        <h3>Others</h3>
+                        <div class="other-settings">
+                            <button class="btn-danger">Delete Account</button>
+                            <button class="btn-secondary" id="logout-btn">Log out</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Budget Modal -->
+    <div class="modal" id="edit-budget-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Budget</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="edit-total-budget">Total Budget (₹)</label>
+                <input type="number" id="edit-total-budget" value="5800">
+            </div>
+            <div class="form-group">
+                <label for="edit-total-spent">Total Spent (₹)</label>
+                <input type="number" id="edit-total-spent" value="2650">
+            </div>
+            <button class="btn-primary" id="save-budget-btn">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Edit Categories Modal -->
+    <div class="modal" id="edit-categories-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Categories</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="edit-housing">Housing (₹)</label>
+                <input type="number" id="edit-housing" value="1200">
+            </div>
+            <div class="form-group">
+                <label for="edit-food">Food & Groceries (₹)</label>
+                <input type="number" id="edit-food" value="550">
+            </div>
+            <div class="form-group">
+                <label for="edit-utilities">Utilities (₹)</label>
+                <input type="number" id="edit-utilities" value="280">
+            </div>
+            <div class="form-group">
+                <label for="edit-entertainment">Entertainment (₹)</label>
+                <input type="number" id="edit-entertainment" value="320">
+            </div>
+            <div class="form-group">
+                <label for="edit-debt">Debt Repayment (₹)</label>
+                <input type="number" id="edit-debt" value="300">
+            </div>
+            <button class="btn-primary" id="save-categories-btn">Save Changes</button>
+        </div>
+    </div>
+
+    <script>
+        // Page navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login functionality
+            const loginForm = document.getElementById('login-form');
+            const loginPage = document.getElementById('login-page');
+            const app = document.getElementById('app');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Simple validation - in a real app, you would validate credentials
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username && password) {
+                    // Update user name display
+                    document.getElementById('user-display-name').textContent = username;
+                    document.getElementById('user-display-name-budget').textContent = username;
+                    document.getElementById('user-display-name-reports').textContent = username;
+                    document.getElementById('user-display-name-settings').textContent = username;
+                    document.getElementById('username-settings').value = username;
+                    
+                    loginPage.classList.remove('active');
+                    app.classList.add('active');
+                } else {
+                    alert('Please enter both username and password');
+                }
+            });
+            
+            // Navigation between pages
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentPages = document.querySelectorAll('.content-page');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function
